@@ -33,7 +33,7 @@ offset_right = 65.5
 offset_bottom = 135.0
 grow_horizontal = 2
 theme_type_variation = &"HeaderLarge"
-text = "YOUR GAME"
+text = "Tilesliding TD"
 horizontal_alignment = 1
 
 [node name="Credit" type="Label" parent="."]
@@ -46,7 +46,7 @@ offset_top = 156.0
 offset_right = 59.5
 offset_bottom = 182.0
 grow_horizontal = 2
-text = "A game by YOU"
+text = "A game by Solrun"
 
 [node name="Controls" type="Label" parent="."]
 layout_mode = 0
