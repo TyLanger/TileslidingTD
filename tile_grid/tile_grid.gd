@@ -1,10 +1,14 @@
 extends Node2D
 
 @export var tile_scene: PackedScene
+@export var tower_scene: PackedScene
 
 var offset = 96
 var tile_width = 80
 var grid
+
+var top_tower_conveyor
+var bot_tower_conveyor
 
 # 96 - 80/2 = 56
 # 56 to 136 is the first tile
@@ -14,6 +18,10 @@ var grid
 var dragging = false
 var col_drag = 0
 var og_click_pos
+
+class ConveyorTower:
+	var tower: Node
+	var exists: bool
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -25,7 +33,7 @@ func _ready():
 			var tile = tile_scene.instantiate()
 			
 		
-			# tile is 128px
+			# tile is 80px
 			tile.position = Vector2(offset + tile_width * i, offset + tile_width * j)
 			#tile.modulate = Color(i/10.0, j/10.0, 1.0-(i+j)/20.0)
 			if(i==0 || j==0 || i==13 || j==6 || i==6 || i==7):
@@ -36,6 +44,18 @@ func _ready():
 			row.append(tile)
 			#grid[i][j] = tile
 		grid.append(row)
+	
+	top_tower_conveyor = []
+	bot_tower_conveyor = []
+	for i in 5:
+		var ct = ConveyorTower.new()
+		ct.exists = false
+		top_tower_conveyor.append(ct)
+		var ct2 = ConveyorTower.new()
+		ct2.exists = false
+		bot_tower_conveyor.append(ct2)
+	spawn_tower(5, 0)
+	spawn_tower(1, 6)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -60,9 +80,11 @@ func _process(delta):
 		print("unclick at: ", mouse)
 		dragging = false
 		reset_col(col_drag)
+		drop_towers(col_drag)
 		
 	if(dragging):
 		change_col(col_drag)
+		move_towers(col_drag)
 	
 func _input(event):
    # Mouse in viewport coordinates.
@@ -72,6 +94,58 @@ func _input(event):
 	elif event is InputEventMouseMotion:
 		#print("Mouse Motion at: ", event.position)
 		pass
+
+
+
+func spawn_tower(x, y):
+	var tower = tower_scene.instantiate()
+	tower.position = Vector2(offset + tile_width * x, offset + tile_width * y)
+	tower.modulate = Color(0.3, 0.8, 0.3)
+	if(y==0):
+		var conveyor = ConveyorTower.new()
+		conveyor.exists = true
+		conveyor.tower = tower
+		top_tower_conveyor[4] = conveyor
+	elif(y==6):
+		var conveyor = ConveyorTower.new()
+		conveyor.exists = true
+		conveyor.tower = tower
+		bot_tower_conveyor[0] = conveyor
+	add_child(tower)
+
+func move_towers(col_index):
+	if(top_tower_conveyor[col_index-1].exists):
+		var mouse_diff = get_viewport().get_mouse_position().y - og_click_pos.y
+		var height = offset + tile_width * 0 + mouse_diff
+		var new_pos = Vector2(offset + tile_width * col_index, height)
+		top_tower_conveyor[col_index-1].tower.position = new_pos
+	if(bot_tower_conveyor[col_index-1].exists):
+		var mouse_diff = get_viewport().get_mouse_position().y - og_click_pos.y
+		var height = offset + tile_width * 6 + mouse_diff
+		var new_pos = Vector2(offset + tile_width * col_index, height)
+		bot_tower_conveyor[col_index-1].tower.position = new_pos
+
+func drop_towers(col_index):
+	
+	# add as a child to the tile you're over
+	if(top_tower_conveyor[col_index-1].exists):
+		var pos = top_tower_conveyor[col_index-1].tower.position
+		var index: int = (pos.y - (offset - (tile_width/2))) / tile_width
+		if(index>0 && index<6):
+			top_tower_conveyor[col_index-1].exists = false
+			top_tower_conveyor[col_index-1].tower.position = Vector2(0.0, 0.0)
+			remove_child(top_tower_conveyor[col_index-1].tower)
+			grid[col_index][index].add_child(top_tower_conveyor[col_index-1].tower)
+	
+	var bot = bot_tower_conveyor[col_index-1]
+	if(bot.exists):
+		var pos = bot.tower.position
+		var index: int = (pos.y - (offset - (tile_width/2))) / tile_width
+		if(index>0 && index<6):
+			bot_tower_conveyor[col_index-1].exists = false
+			bot.tower.position = Vector2.ZERO
+			remove_child(bot.tower)
+			grid[col_index][index].add_child(bot.tower)
 
 func change_col(col_index):
 	for i in range(1,6):
