@@ -56,6 +56,7 @@ func _ready():
 		bot_tower_conveyor.append(ct2)
 	spawn_tower(5, 0)
 	spawn_tower(1, 6)
+	spawn_tower(5, 6)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -101,16 +102,17 @@ func spawn_tower(x, y):
 	var tower = tower_scene.instantiate()
 	tower.position = Vector2(offset + tile_width * x, offset + tile_width * y)
 	tower.modulate = Color(0.3, 0.8, 0.3)
+	tower.place_on_conveyor()
 	if(y==0):
 		var conveyor = ConveyorTower.new()
 		conveyor.exists = true
 		conveyor.tower = tower
-		top_tower_conveyor[4] = conveyor
+		top_tower_conveyor[x-1] = conveyor
 	elif(y==6):
 		var conveyor = ConveyorTower.new()
 		conveyor.exists = true
 		conveyor.tower = tower
-		bot_tower_conveyor[0] = conveyor
+		bot_tower_conveyor[x-1] = conveyor
 	add_child(tower)
 
 func move_towers(col_index):
@@ -127,15 +129,36 @@ func move_towers(col_index):
 
 func drop_towers(col_index):
 	
+	var top_tower_transfer = false
 	# add as a child to the tile you're over
 	if(top_tower_conveyor[col_index-1].exists):
 		var pos = top_tower_conveyor[col_index-1].tower.position
 		var index: int = (pos.y - (offset - (tile_width/2))) / tile_width
+		# over a tile
 		if(index>0 && index<6):
 			top_tower_conveyor[col_index-1].exists = false
 			top_tower_conveyor[col_index-1].tower.position = Vector2(0.0, 0.0)
+			top_tower_conveyor[col_index-1].tower.place_on_tile()
 			remove_child(top_tower_conveyor[col_index-1].tower)
 			grid[col_index][index].add_child(top_tower_conveyor[col_index-1].tower)
+		elif(index==0 || index==6):
+			# if over either conveyor, return home
+			# probably the easiest way to handle this
+			top_tower_conveyor[col_index-1].tower.position = Vector2(offset + tile_width * col_index, offset + tile_width * 0)
+		elif(index==6):
+			# need to do this after the bot tower has a chance to stick to a tile
+			#bot_tower_conveyor
+			top_tower_transfer = true
+		elif(index<0 || index>6):
+			top_tower_conveyor[col_index-1].exists = false
+			top_tower_conveyor[col_index-1].tower.queue_free()
+			
+		# what to do when over a conveyor?
+		# place back on it probs
+		# what if another tower is there? Which one dies?
+		# you'd be moving both so they can't be on top of one another
+		# what to do when past the conveyors?
+		# delete it
 	
 	var bot = bot_tower_conveyor[col_index-1]
 	if(bot.exists):
@@ -144,8 +167,20 @@ func drop_towers(col_index):
 		if(index>0 && index<6):
 			bot_tower_conveyor[col_index-1].exists = false
 			bot.tower.position = Vector2.ZERO
+			bot.tower.place_on_tile()
 			remove_child(bot.tower)
 			grid[col_index][index].add_child(bot.tower)
+		elif(index==6 || index==0):
+			bot_tower_conveyor[col_index-1].tower.position = Vector2(offset + tile_width * col_index, offset + tile_width * 6)
+		elif(index==0):
+			# swap conveyors
+			# if another tower exists on the other conveyor, it will either be out of bounds and deleted
+			# or on a tile by now
+			# or it was over top of an existing tower and I don't know what behaviour that has yet...
+			pass
+		elif(index<0 || index>6):
+			bot_tower_conveyor[col_index-1].exists = false
+			bot_tower_conveyor[col_index-1].tower.queue_free()
 
 func change_col(col_index):
 	for i in range(1,6):
