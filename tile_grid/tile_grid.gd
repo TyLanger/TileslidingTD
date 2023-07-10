@@ -2,6 +2,7 @@ extends Node2D
 
 @export var tile_scene: PackedScene
 @export var tower_scene: PackedScene
+@export var enemy_scene: PackedScene
 
 var offset = 96
 var tile_width = 80
@@ -22,6 +23,9 @@ var og_click_pos
 class ConveyorTower:
 	var tower: Node
 	var exists: bool
+
+enum GameState {VertTowers, HorPowerups, VertEnemies, HorEnemyBuffs, PreCombat, Combat, PostCombat}
+var current_state = GameState.VertTowers
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -57,6 +61,8 @@ func _ready():
 	spawn_tower(5, 0)
 	spawn_tower(1, 6)
 	spawn_tower(5, 6)
+	
+	spawn_enemy(11, 3)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -96,7 +102,11 @@ func _input(event):
 		#print("Mouse Motion at: ", event.position)
 		pass
 
-
+func spawn_enemy(x, y):
+	var enemy = enemy_scene.instantiate()
+	enemy.position = Vector2(offset + tile_width * x, offset + tile_width * y)
+	enemy.set_move(false)
+	add_child(enemy)
 
 func spawn_tower(x, y):
 	var tower = tower_scene.instantiate()

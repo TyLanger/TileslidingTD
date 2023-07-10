@@ -1,10 +1,12 @@
-[gd_scene load_steps=4 format=3 uid="uid://dpboxbxs5f05f"]
+[gd_scene load_steps=5 format=3 uid="uid://dpboxbxs5f05f"]
 
 [ext_resource type="Script" path="res://tile_grid/tile_grid.gd" id="1_72qoe"]
 [ext_resource type="PackedScene" uid="uid://b7br6tdn24ftk" path="res://tile_grid/tile.tscn" id="2_27emv"]
 [ext_resource type="PackedScene" uid="uid://56tn76x8v5l0" path="res://tile_grid/tower.tscn" id="3_n4fl5"]
+[ext_resource type="PackedScene" uid="uid://dh2xfuos7rt6b" path="res://tile_grid/enemy.tscn" id="4_q7oio"]
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_72qoe")
 tile_scene = ExtResource("2_27emv")
 tower_scene = ExtResource("3_n4fl5")
+enemy_scene = ExtResource("4_q7oio")

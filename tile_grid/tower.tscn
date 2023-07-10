@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bgprycbqd2tbx" path="res://assets/icon.svg" id="2_b12nj"]
 
 [node name="Node2D" type="Node2D"]
+position = Vector2(654, 307)
 script = ExtResource("1_dkjr5")
 arrow_scene = ExtResource("2_4sli6")
 

@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://dh2xfuos7rt6b"]
+
+[ext_resource type="Script" path="res://tile_grid/enemy.gd" id="1_mh75x"]
+[ext_resource type="Texture2D" uid="uid://bgprycbqd2tbx" path="res://assets/icon.svg" id="2_cjkly"]
+
+[node name="Node2D" type="Node2D"]
+position = Vector2(611, 344)
+script = ExtResource("1_mh75x")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(0.760784, 0, 0.172549, 1)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_cjkly")
